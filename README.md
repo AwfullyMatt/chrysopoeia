@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # A Bevy game template
 
 Template for a Game using the awesome [Bevy engine][bevy] featuring out of the box builds for Windows, Linux, macOS, Web (Wasm), Android, and iOS.
@@ -101,3 +102,7 @@ This project is licensed under [CC0 1.0 Universal](LICENSE) except some content 
 [mobile_dev_with_bevy_2]: https://www.nikl.me/blog/2023/notes_on_mobile_development_with_bevy_2/
 [workflow_bevy_android]: https://www.nikl.me/blog/2023/github_workflow_to_publish_android_app/
 [workflow_bevy_ios]: https://www.nikl.me/blog/2023/github_workflow_to_publish_ios_app/
+=======
+# chrysopoeia
+Not all that glitters is golden.
+>>>>>>> origin/main
