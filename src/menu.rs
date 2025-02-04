@@ -1,67 +1,57 @@
 use crate::loading::TextureAssets;
+use crate::ui::{UiBackgroundColor, UiBorderColor, UiButtonNode, UiParentNode, UiTextColor};
 use crate::GameState;
 use bevy::prelude::*;
 
 pub struct MenuPlugin;
 
-/// This plugin is responsible for the game menu (containing only one button...)
-/// The menu is only drawn during the State `GameState::Menu` and is removed when that state is exited
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Menu), setup_menu)
+        app.add_systems(OnEnter(GameState::Menu), startup)
             .add_systems(Update, click_play_button.run_if(in_state(GameState::Menu)))
-            .add_systems(OnExit(GameState::Menu), cleanup_menu);
+            .add_systems(OnExit(GameState::Menu), cleanup);
     }
 }
 
 #[derive(Component)]
-struct ButtonColors {
-    normal: Color,
-    hovered: Color,
-}
+struct MainMenu;
 
-impl Default for ButtonColors {
-    fn default() -> Self {
-        ButtonColors {
-            normal: Color::linear_rgb(0.15, 0.15, 0.15),
-            hovered: Color::linear_rgb(0.25, 0.25, 0.25),
-        }
-    }
+#[derive(Component)]
+#[allow(dead_code)] // TODO:
+enum MainMenuButton {
+    Play,
+    Settings,
+    Exit,
+    Github,
+    Bevy,
 }
 
 #[derive(Component)]
-struct Menu;
+struct CleanupMainMenu;
 
-fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
-    info!("menu");
+fn startup(mut commands: Commands, textures: Res<TextureAssets>) {
+    info!("[STARUP] Main Menu");
     commands.spawn((Camera2d, Msaa::Off));
+    let style = (
+        BackgroundColor(UiBackgroundColor::default().normal.srgb()),
+        BorderColor(UiBorderColor::default().normal.srgb()),
+        BorderRadius::ZERO,
+    );
     commands
         .spawn((
-            Node {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                ..default()
-            },
-            Menu,
+            Name::new("Main Menu Parent Node"),
+            UiParentNode::normal(),
+            MainMenu,
+            CleanupMainMenu,
         ))
         .with_children(|children| {
-            let button_colors = ButtonColors::default();
             children
                 .spawn((
+                    Name::new("Play Button Node"),
                     Button,
-                    Node {
-                        width: Val::Px(140.0),
-                        height: Val::Px(50.0),
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
-                        ..Default::default()
-                    },
-                    BackgroundColor(button_colors.normal),
-                    button_colors,
-                    ChangeState(GameState::Playing),
+                    MainMenuButton::Play,
+                    UiButtonNode::normal(),
+                    style.clone(),
                 ))
                 .with_child((
                     Text::new("Play"),
@@ -69,11 +59,12 @@ fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
                         font_size: 40.0,
                         ..default()
                     },
-                    TextColor(Color::linear_rgb(0.9, 0.9, 0.9)),
+                    TextColor(UiTextColor::default().normal.srgb()),
                 ));
         });
     commands
         .spawn((
+            Name::new("Bottom Parent Node"),
             Node {
                 flex_direction: FlexDirection::Row,
                 align_items: AlignItems::Center,
@@ -83,35 +74,28 @@ fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
                 position_type: PositionType::Absolute,
                 ..default()
             },
-            Menu,
+            MainMenu,
+            CleanupMainMenu,
         ))
         .with_children(|children| {
             children
                 .spawn((
+                    Name::new("Bevy Logo Child Node"),
                     Button,
-                    Node {
-                        width: Val::Px(170.0),
-                        height: Val::Px(50.0),
-                        justify_content: JustifyContent::SpaceAround,
-                        align_items: AlignItems::Center,
-                        padding: UiRect::all(Val::Px(5.)),
-                        ..Default::default()
-                    },
-                    BackgroundColor(Color::NONE),
-                    ButtonColors {
-                        normal: Color::NONE,
-                        ..default()
-                    },
+                    MainMenuButton::Bevy,
+                    UiButtonNode::small(),
+                    style.clone(),
                     OpenLink("https://bevyengine.org"),
                 ))
                 .with_children(|parent| {
                     parent.spawn((
+                        Name::new("Bevy Logo Grandchild Node"),
                         Text::new("Made with Bevy"),
                         TextFont {
                             font_size: 15.0,
                             ..default()
                         },
-                        TextColor(Color::linear_rgb(0.9, 0.9, 0.9)),
+                        TextColor(UiTextColor::default().normal.srgb()),
                     ));
                     parent.spawn((
                         ImageNode {
@@ -126,32 +110,25 @@ fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
                 });
             children
                 .spawn((
+                    Name::new("Github Parent Node"),
                     Button,
-                    Node {
-                        width: Val::Px(170.0),
-                        height: Val::Px(50.0),
-                        justify_content: JustifyContent::SpaceAround,
-                        align_items: AlignItems::Center,
-                        padding: UiRect::all(Val::Px(5.)),
-                        ..default()
-                    },
-                    BackgroundColor(Color::NONE),
-                    ButtonColors {
-                        normal: Color::NONE,
-                        hovered: Color::linear_rgb(0.25, 0.25, 0.25),
-                    },
-                    OpenLink("https://github.com/NiklasEi/bevy_game_template"),
+                    MainMenuButton::Github,
+                    UiButtonNode::small(),
+                    style.clone(),
+                    OpenLink("https://github.com/AwfullyMatt/chrysopoeia"),
                 ))
                 .with_children(|parent| {
                     parent.spawn((
-                        Text::new("Open source"),
+                        Name::new("Github Text Node"),
+                        Text::new("Github"),
                         TextFont {
                             font_size: 15.0,
                             ..default()
                         },
-                        TextColor(Color::linear_rgb(0.9, 0.9, 0.9)),
+                        TextColor(UiTextColor::default().normal.srgb()),
                     ));
                     parent.spawn((
+                        Name::new("Github Image Node"),
                         ImageNode::new(textures.github.clone()),
                         Node {
                             width: Val::Px(32.),
@@ -163,47 +140,47 @@ fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
 }
 
 #[derive(Component)]
-struct ChangeState(GameState);
-
-#[derive(Component)]
 struct OpenLink(&'static str);
 
 fn click_play_button(
     mut next_state: ResMut<NextState<GameState>>,
     mut interaction_query: Query<
-        (
-            &Interaction,
-            &mut BackgroundColor,
-            &ButtonColors,
-            Option<&ChangeState>,
-            Option<&OpenLink>,
-        ),
+        (&Interaction, &MainMenuButton, Option<&OpenLink>),
         (Changed<Interaction>, With<Button>),
     >,
 ) {
-    for (interaction, mut color, button_colors, change_state, open_link) in &mut interaction_query {
+    for (interaction, mmb, open_link) in &mut interaction_query {
         match *interaction {
-            Interaction::Pressed => {
-                if let Some(state) = change_state {
-                    next_state.set(state.0.clone());
-                } else if let Some(link) = open_link {
-                    if let Err(error) = webbrowser::open(link.0) {
-                        warn!("Failed to open link {error:?}");
+            Interaction::Pressed => match mmb {
+                MainMenuButton::Play => {
+                    next_state.set(GameState::Playing);
+                }
+                MainMenuButton::Settings => {}
+                MainMenuButton::Exit => {}
+                MainMenuButton::Github => {
+                    if let Some(link) = open_link {
+                        if let Err(error) = webbrowser::open(link.0) {
+                            warn!("Failed to open link {error:?}");
+                        }
                     }
                 }
-            }
-            Interaction::Hovered => {
-                *color = button_colors.hovered.into();
-            }
-            Interaction::None => {
-                *color = button_colors.normal.into();
-            }
+                MainMenuButton::Bevy => {
+                    if let Some(link) = open_link {
+                        if let Err(error) = webbrowser::open(link.0) {
+                            warn!("Failed to open link {error:?}");
+                        }
+                    }
+                }
+            },
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }
 
-fn cleanup_menu(mut commands: Commands, menu: Query<Entity, With<Menu>>) {
+fn cleanup(mut commands: Commands, menu: Query<Entity, With<CleanupMainMenu>>) {
     for entity in menu.iter() {
         commands.entity(entity).despawn_recursive();
+        info!("[CLEANUP] Main Menu");
     }
 }
