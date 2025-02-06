@@ -23,6 +23,7 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::winit::WinitWindows;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy_kira_audio::AudioPlugin;
 use ui::{Palette, UiPlugin};
 use winit::window::Icon;
 
@@ -57,6 +58,7 @@ impl Plugin for GamePlugin {
                     })
                     .set(ImagePlugin::default_nearest()),
             )
+            .add_plugins(AudioPlugin)
             .add_plugins(WorldInspectorPlugin::new())
             .add_plugins((
                 LoadingPlugin,
