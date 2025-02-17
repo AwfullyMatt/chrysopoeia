@@ -13,9 +13,13 @@ impl Plugin for InternalAudioPlugin {
             .add_systems(FixedUpdate, tick_metronome)
             .add_systems(
                 Update,
-                (evr_play_metronome_audio, evr_pause_metronome_audio),
+                (
+                    evr_play_metronome_audio,
+                    evr_pause_metronome_audio,
+                    update_note_timers,
+                ),
             )
-            .init_resource::<CurrentAudioInfo>()
+            .init_resource::<CurrentSong>()
             .init_resource::<MetronomeAudioChannel>()
             .add_audio_channel::<MetronomeAudioChannel>()
             .add_event::<PlayMetronomeAudio>()
@@ -23,9 +27,9 @@ impl Plugin for InternalAudioPlugin {
     }
 }
 
-fn startup(mut commands: Commands, current_audio_info: Res<CurrentAudioInfo>) {
-    if let Some(audio_info) = current_audio_info.info() {
-        commands.spawn(MetronomeBundle::new(&audio_info));
+fn startup(mut commands: Commands, current_song: Res<CurrentSong>) {
+    if let Some(song) = &current_song.0 {
+        commands.spawn(MetronomeBundle::new(&song.info));
     } else {
         commands.spawn(MetronomeBundle::default());
     }
@@ -56,34 +60,14 @@ struct AudioInfo {
     body: AudioLength,
     outro: Option<AudioLength>,
 }
-impl AudioInfo {
-    pub fn tempo(&self) -> Tempo {
-        self.tempo
-    }
-    pub fn metre(&self) -> Metre {
-        self.metre
-    }
-    pub fn intro(&self) -> Option<AudioLength> {
-        self.intro
-    }
-    pub fn body(&self) -> AudioLength {
-        self.body
-    }
-    pub fn outro(&self) -> Option<AudioLength> {
-        self.outro
-    }
-}
+impl AudioInfo {}
 
 #[derive(Clone, Copy, Default, Deref, DerefMut)]
 struct AudioLength(f32);
 
-#[derive(Clone, Copy, Default, Resource)]
-struct CurrentAudioInfo(Option<AudioInfo>);
-impl CurrentAudioInfo {
-    pub fn info(&self) -> Option<AudioInfo> {
-        self.0
-    }
-}
+#[derive(Clone, Default, Resource)]
+struct CurrentSong(Option<Song>);
+impl CurrentSong {}
 
 #[derive(Bundle, Clone, Default)]
 struct MetronomeBundle {
@@ -119,42 +103,14 @@ impl Metronome {
             thirtysecond_note: NoteTimer::new(NoteKind::ThirtySecond, audio_info),
         }
     }
-    fn whole(&self) -> &NoteTimer {
-        &self.whole_note
-    }
-    fn half(&self) -> &NoteTimer {
-        &self.half_note
-    }
-    fn quarter(&self) -> &NoteTimer {
-        &self.quarter_note
-    }
-    fn eighth(&self) -> &NoteTimer {
-        &self.eighth_note
-    }
-    fn sixteenth(&self) -> &NoteTimer {
-        &self.sixteenth_note
-    }
-    fn thirtysecond(&self) -> &NoteTimer {
-        &self.thirtysecond_note
-    }
 
-    fn whole_mut(&mut self) -> &mut NoteTimer {
-        &mut self.whole_note
-    }
-    fn half_mut(&mut self) -> &mut NoteTimer {
-        &mut self.half_note
-    }
-    fn quarter_mut(&mut self) -> &mut NoteTimer {
-        &mut self.quarter_note
-    }
-    fn eighth_mut(&mut self) -> &mut NoteTimer {
-        &mut self.eighth_note
-    }
-    fn sixteenth_mut(&mut self) -> &mut NoteTimer {
-        &mut self.sixteenth_note
-    }
-    fn thirtysecond_mut(&mut self) -> &mut NoteTimer {
-        &mut self.thirtysecond_note
+    fn update(&mut self, audio_info: &AudioInfo) {
+        self.whole_note.update(audio_info);
+        self.half_note.update(audio_info);
+        self.quarter_note.update(audio_info);
+        self.eighth_note.update(audio_info);
+        self.sixteenth_note.update(audio_info);
+        self.thirtysecond_note.update(audio_info);
     }
 }
 
@@ -173,32 +129,24 @@ impl NoteTimer {
             kind,
         }
     }
-    fn timer_mut(&mut self) -> &mut Timer {
-        &mut self.timer
+
+    fn update(&mut self, audio_info: &AudioInfo) {
+        self.timer.set_duration(Duration::from_secs_f32(
+            self.kind.length(audio_info).unwrap_or_default(),
+        ));
     }
 }
 
 #[derive(Component, Clone, Copy, Default, Deref, DerefMut)]
 struct Tempo(f32);
-impl Tempo {
-    fn get(&self) -> f32 {
-        self.0
-    }
-}
+impl Tempo {}
 
 #[derive(Component, Clone, Copy, Default)]
 struct Metre {
     top: u8,
     bottom: u8,
 }
-impl Metre {
-    fn top(&self) -> u8 {
-        self.top
-    }
-    fn bottom(&self) -> u8 {
-        self.bottom
-    }
-}
+impl Metre {}
 
 #[derive(Component, Clone, Copy, Default)]
 enum NoteKind {
@@ -213,30 +161,30 @@ enum NoteKind {
 impl NoteKind {
     fn length(&self, audio_info: &AudioInfo) -> Option<f32> {
         use NoteKind::*;
-        let bps: f32 = audio_info.tempo().get() / 60.0;
+        let bps: f32 = audio_info.tempo.0 / 60.0;
         match self {
             Whole => {
-                let length = bps * audio_info.metre().top() as f32;
+                let length = bps * audio_info.metre.top as f32;
                 Some(length)
             }
             Half => {
-                let length = (bps * audio_info.metre().top() as f32) / 2.0;
+                let length = (bps * audio_info.metre.top as f32) / 2.0;
                 Some(length)
             }
             Quarter => {
-                let length = (bps * audio_info.metre().top() as f32) / 4.0;
+                let length = (bps * audio_info.metre.top as f32) / 4.0;
                 Some(length)
             }
             Eighth => {
-                let length = (bps * audio_info.metre().top() as f32) / 8.0;
+                let length = (bps * audio_info.metre.top as f32) / 8.0;
                 Some(length)
             }
             Sixteenth => {
-                let length = (bps * audio_info.metre().top() as f32) / 16.0;
+                let length = (bps * audio_info.metre.top as f32) / 16.0;
                 Some(length)
             }
             ThirtySecond => {
-                let length = (bps * audio_info.metre().top() as f32) / 32.0;
+                let length = (bps * audio_info.metre.top as f32) / 32.0;
                 Some(length)
             }
         }
@@ -245,12 +193,12 @@ impl NoteKind {
 
 fn tick_metronome(time: Res<Time>, mut query_metronome: Query<&mut Metronome>) {
     if let Ok(mut metronome) = query_metronome.get_single_mut() {
-        metronome.whole_mut().timer_mut().tick(time.delta());
-        metronome.half_mut().timer_mut().tick(time.delta());
-        metronome.quarter_mut().timer_mut().tick(time.delta());
-        metronome.eighth_mut().timer_mut().tick(time.delta());
-        metronome.sixteenth_mut().timer_mut().tick(time.delta());
-        metronome.thirtysecond_mut().timer_mut().tick(time.delta());
+        metronome.whole_note.timer.tick(time.delta());
+        metronome.half_note.timer.tick(time.delta());
+        metronome.quarter_note.timer.tick(time.delta());
+        metronome.eighth_note.timer.tick(time.delta());
+        metronome.sixteenth_note.timer.tick(time.delta());
+        metronome.thirtysecond_note.timer.tick(time.delta());
     }
 }
 
@@ -269,5 +217,15 @@ fn evr_pause_metronome_audio(
 ) {
     for _ev in evr_pause_metronome_audio.read() {
         metronome_channel.pause();
+    }
+}
+
+fn update_note_timers(current_song: Res<CurrentSong>, mut query_metronome: Query<&mut Metronome>) {
+    if current_song.is_changed() {
+        if let Some(song) = &current_song.0 {
+            if let Ok(mut metronome) = query_metronome.get_single_mut() {
+                metronome.update(&song.info);
+            }
+        }
     }
 }
