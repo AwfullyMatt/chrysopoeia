@@ -108,6 +108,7 @@ struct Metronome {
     eighth_note: NoteTimer,
     sixteenth_note: NoteTimer,
     thirtysecond_note: NoteTimer,
+    measure_timer: NoteTimer,
 }
 impl Metronome {
     fn new(audio_info: &AudioInfo) -> Self {
@@ -118,6 +119,7 @@ impl Metronome {
             eighth_note: NoteTimer::new(NoteKind::Eighth, audio_info),
             sixteenth_note: NoteTimer::new(NoteKind::Sixteenth, audio_info),
             thirtysecond_note: NoteTimer::new(NoteKind::ThirtySecond, audio_info),
+            measure_timer: NoteTimer::new(NoteKind::Measure, audio_info),
         }
     }
 
@@ -174,6 +176,7 @@ enum NoteKind {
     Eighth,
     Sixteenth,
     ThirtySecond,
+    Measure,
 }
 impl NoteKind {
     fn length(&self, audio_info: &AudioInfo) -> Option<f32> {
@@ -181,31 +184,16 @@ impl NoteKind {
         let bps: f32 = audio_info.tempo.0 / 60.0;
         let spb: f32 = 1.0 / bps;
         let top: f32 = audio_info.metre.top as f32;
+        let bottom: f32 = audio_info.metre.bottom as f32;
+
         match self {
-            Whole => {
-                let length = spb * top;
-                Some(length)
-            }
-            Half => {
-                let length = (spb * top) / 2.0;
-                Some(length)
-            }
-            Quarter => {
-                let length = (spb * top) / 4.0;
-                Some(length)
-            }
-            Eighth => {
-                let length = (spb * top) / 8.0;
-                Some(length)
-            }
-            Sixteenth => {
-                let length = (spb * top) / 16.0;
-                Some(length)
-            }
-            ThirtySecond => {
-                let length = (spb * top) / 32.0;
-                Some(length)
-            }
+            Whole => Some(bottom * spb),
+            Half => Some((bottom / 2.0) * spb),
+            Quarter => Some((bottom / 4.0) * spb),
+            Eighth => Some((bottom / 8.0) * spb),
+            Sixteenth => Some((bottom / 16.0) * spb),
+            ThirtySecond => Some((bottom / 32.0) * spb),
+            Measure => Some(top * spb),
         }
     }
 }
