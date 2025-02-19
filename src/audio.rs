@@ -11,22 +11,12 @@ impl Plugin for InternalAudioPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, startup)
             .add_systems(FixedUpdate, tick_metronome)
-            .add_systems(
-                Update,
-                (
-                    evr_play_metronome_audio,
-                    evr_pause_metronome_audio,
-                    evr_stop_metronome_audio,
-                    update_note_timers,
-                ),
-            )
+            .add_systems(Update, (evr_control_metronome, update_note_timers))
             .init_resource::<CurrentSong>()
             .init_resource::<MetronomeAudioChannel>()
             .init_state::<MetronomeState>()
             .add_audio_channel::<MetronomeAudioChannel>()
-            .add_event::<PlayMetronomeAudio>()
-            .add_event::<PauseMetronomeAudio>()
-            .add_event::<StopMetronomeAudio>();
+            .add_event::<MetronomeEvent>();
     }
 }
 
@@ -47,17 +37,30 @@ fn startup(mut commands: Commands, current_song: Res<CurrentSong>) {
     info!("[SPAWNED] Metronome");
 }
 
+#[derive(Event, Deref)]
+struct MetronomeEvent(MetronomeCommand);
+
+enum MetronomeCommand {
+    Play(Song),
+    Pause,
+    Resume,
+    Stop,
+}
+impl MetronomeCommand {
+    fn state(&self) -> MetronomeState {
+        use MetronomeCommand::*;
+        use MetronomeState::*;
+        match self {
+            Play(_) => Playing,
+            Pause => Paused,
+            Resume => Playing,
+            Stop => Stopped,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Default, Resource)]
 struct MetronomeAudioChannel;
-
-#[derive(Event, Deref)]
-struct PlayMetronomeAudio(Song);
-
-#[derive(Event)]
-struct PauseMetronomeAudio;
-
-#[derive(Event)]
-struct StopMetronomeAudio;
 
 #[derive(Component, Clone)]
 struct Song {
@@ -218,47 +221,28 @@ fn tick_metronome(time: Res<Time>, mut query_metronome: Query<&mut Metronome>) {
     }
 }
 
-fn evr_play_metronome_audio(
-    mut evr_play_metronome_audio: EventReader<PlayMetronomeAudio>,
+fn evr_control_metronome(
+    mut evr_control_metronome: EventReader<MetronomeEvent>,
     metronome_channel: Res<AudioChannel<MetronomeAudioChannel>>,
     metronome_state: Res<State<MetronomeState>>,
     mut next_metronome_state: ResMut<NextState<MetronomeState>>,
 ) {
-    for ev in evr_play_metronome_audio.read() {
-        metronome_channel.play(ev.0.handle.clone());
-        if metronome_state.get() != &MetronomeState::Playing {
-            next_metronome_state.set(MetronomeState::Playing);
+    use MetronomeCommand::*;
+    for ev in evr_control_metronome.read() {
+        match &ev.0 {
+            Play(song) => {
+                metronome_channel.play(song.handle.clone());
+            }
+            Pause => {}
+            Resume => {}
+            Stop => {}
+        }
+        if metronome_state.get() != &ev.0.state() {
+            next_metronome_state.set(ev.0.state());
         }
     }
 }
 
-fn evr_pause_metronome_audio(
-    mut evr_pause_metronome_audio: EventReader<PauseMetronomeAudio>,
-    metronome_channel: Res<AudioChannel<MetronomeAudioChannel>>,
-    metronome_state: Res<State<MetronomeState>>,
-    mut next_metronome_state: ResMut<NextState<MetronomeState>>,
-) {
-    for _ev in evr_pause_metronome_audio.read() {
-        metronome_channel.pause();
-        if metronome_state.get() != &MetronomeState::Paused {
-            next_metronome_state.set(MetronomeState::Paused);
-        }
-    }
-}
-
-fn evr_stop_metronome_audio(
-    mut evr_pause_metronome_audio: EventReader<StopMetronomeAudio>,
-    metronome_channel: Res<AudioChannel<MetronomeAudioChannel>>,
-    metronome_state: Res<State<MetronomeState>>,
-    mut next_metronome_state: ResMut<NextState<MetronomeState>>,
-) {
-    for _ev in evr_pause_metronome_audio.read() {
-        metronome_channel.pause();
-        if metronome_state.get() != &MetronomeState::Stopped {
-            next_metronome_state.set(MetronomeState::Stopped);
-        }
-    }
-}
 fn update_note_timers(current_song: Res<CurrentSong>, mut query_metronome: Query<&mut Metronome>) {
     if current_song.is_changed() {
         if let Some(song) = &current_song.0 {
