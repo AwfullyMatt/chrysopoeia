@@ -23,4 +23,8 @@ pub struct TextureAssets {
     pub bevy: Handle<Image>,
     #[asset(path = "textures/github.png")]
     pub github: Handle<Image>,
+    #[asset(texture_atlas_layout(tile_size_x = 40, tile_size_y = 40, columns = 3, rows = 1,))]
+    pub button_layout: Handle<TextureAtlasLayout>,
+    #[asset(path = "textures/button_atlas.png")]
+    pub button_atlas: Handle<Image>,
 }

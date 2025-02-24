@@ -1,6 +1,6 @@
 use crate::loading::TextureAssets;
 use crate::ui::{UiBackgroundColor, UiBorderColor, UiButtonNode, UiParentNode, UiTextColor};
-use crate::GameState;
+use crate::{CombatState, GameState};
 use bevy::prelude::*;
 
 pub struct MenuPlugin;
@@ -143,7 +143,8 @@ fn startup(mut commands: Commands, textures: Res<TextureAssets>) {
 struct OpenLink(&'static str);
 
 fn click_play_button(
-    mut next_state: ResMut<NextState<GameState>>,
+    mut game_state: ResMut<NextState<GameState>>,
+    mut combat_state: ResMut<NextState<CombatState>>,
     mut interaction_query: Query<
         (&Interaction, &MainMenuButton, Option<&OpenLink>),
         (Changed<Interaction>, With<Button>),
@@ -153,7 +154,8 @@ fn click_play_button(
         match *interaction {
             Interaction::Pressed => match mmb {
                 MainMenuButton::Play => {
-                    next_state.set(GameState::Playing);
+                    game_state.set(GameState::Playing);
+                    //combat_state.set(CombatState::In);
                 }
                 MainMenuButton::Settings => {}
                 MainMenuButton::Exit => {}

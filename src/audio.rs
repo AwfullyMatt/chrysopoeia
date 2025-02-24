@@ -130,6 +130,7 @@ impl Metronome {
         self.eighth_note.update(audio_info);
         self.sixteenth_note.update(audio_info);
         self.thirtysecond_note.update(audio_info);
+        self.measure_timer.update(audio_info);
     }
 }
 

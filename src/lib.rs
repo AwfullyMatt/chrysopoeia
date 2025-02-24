@@ -2,9 +2,11 @@
 
 mod actions;
 mod audio;
+mod combat;
 mod loading;
 mod menu;
 mod player;
+mod settings;
 mod ui;
 
 use std::io::Cursor;
@@ -15,8 +17,8 @@ use crate::loading::LoadingPlugin;
 use crate::menu::MenuPlugin;
 use crate::player::PlayerPlugin;
 
-use bevy::app::App;
 use bevy::asset::AssetMetaCheck;
+use bevy::{app::App, window::WindowResolution};
 /* #[cfg(debug_assertions)]
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin}; */
 use bevy::prelude::*;
@@ -24,6 +26,7 @@ use bevy::window::PrimaryWindow;
 use bevy::winit::WinitWindows;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_kira_audio::AudioPlugin;
+use combat::CombatPlugin;
 use ui::{Palette, UiPlugin};
 use winit::window::Icon;
 
@@ -48,6 +51,7 @@ impl Plugin for GamePlugin {
                             prevent_default_event_handling: false,
                             window_theme: Some(bevy::window::WindowTheme::Dark),
                             resizable: false,
+                            resolution: WindowResolution::new(960., 864.),
                             ..default()
                         }),
                         ..default()
@@ -67,11 +71,13 @@ impl Plugin for GamePlugin {
                 InternalAudioPlugin,
                 PlayerPlugin,
                 UiPlugin,
+                CombatPlugin,
             ))
             .add_systems(Startup, startup)
             .init_state::<GameState>()
             .insert_resource(ClearColor(Palette::Dark.srgb()))
-            .add_sub_state::<PauseState>();
+            .add_sub_state::<PauseState>()
+            .add_sub_state::<CombatState>();
 
         /* #[cfg(debug_assertions)]
         {
@@ -86,6 +92,7 @@ pub enum GameState {
     Loading,
     Playing,
     Menu,
+    Settings,
 }
 
 #[derive(SubStates, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
@@ -94,6 +101,14 @@ pub enum PauseState {
     #[default]
     Unpaused,
     Paused,
+}
+
+#[derive(SubStates, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+#[source(GameState = GameState::Playing)]
+pub enum CombatState {
+    Out,
+    #[default]
+    In,
 }
 
 fn startup(windows: NonSend<WinitWindows>, primary_window: Query<Entity, With<PrimaryWindow>>) {
