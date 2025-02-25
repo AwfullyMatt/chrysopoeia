@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{loading::TextureAssets, CombatState};
+use crate::{loading::TextureAssets, settings::Settings, CombatState};
 
 pub struct CombatPlugin;
 impl Plugin for CombatPlugin {
@@ -17,7 +17,7 @@ impl Plugin for CombatPlugin {
 #[derive(Component)]
 struct CleanupCombat;
 
-fn startup(mut commands: Commands, texture_assets: Res<TextureAssets>) {
+fn startup(mut commands: Commands, texture_assets: Res<TextureAssets>, settings: Res<Settings>) {
     let entity = commands
         .spawn((
             Node {
@@ -42,8 +42,8 @@ fn startup(mut commands: Commands, texture_assets: Res<TextureAssets>) {
                     TextureAtlas::from(texture_assets.button_layout.clone()),
                 ),
                 Node {
-                    width: Val::Px(40.),
-                    height: Val::Px(40.),
+                    width: Val::Px(40. * settings.resolution.scale.scale()),
+                    height: Val::Px(40. * settings.resolution.scale.scale()),
                     ..default()
                 },
             ))

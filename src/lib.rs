@@ -27,6 +27,7 @@ use bevy::winit::WinitWindows;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_kira_audio::AudioPlugin;
 use combat::CombatPlugin;
+use settings::{Settings, SettingsPlugin};
 use ui::{Palette, UiPlugin};
 use winit::window::Icon;
 
@@ -51,7 +52,7 @@ impl Plugin for GamePlugin {
                             prevent_default_event_handling: false,
                             window_theme: Some(bevy::window::WindowTheme::Dark),
                             resizable: false,
-                            resolution: WindowResolution::new(960., 864.),
+                            resolution: WindowResolution::new(320., 288.),
                             ..default()
                         }),
                         ..default()
@@ -72,6 +73,7 @@ impl Plugin for GamePlugin {
                 PlayerPlugin,
                 UiPlugin,
                 CombatPlugin,
+                SettingsPlugin,
             ))
             .add_systems(Startup, startup)
             .init_state::<GameState>()

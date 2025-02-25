@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 
 use crate::GameState;
 
@@ -9,21 +10,28 @@ impl Plugin for SettingsPlugin {
     }
 
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Settings), startup);
+        app.add_systems(Startup, startup)
+            .add_systems(OnEnter(GameState::Settings), on_enter)
+            .insert_resource(Settings::default());
     }
 }
 
+#[derive(Resource, Clone, Default, Serialize, Deserialize)]
 pub struct Settings {
-    resolution: Resolution,
+    pub resolution: Resolution,
+    pub monitor: Option<usize>,
 }
 
+#[derive(Clone, Default, Serialize, Deserialize)]
 pub struct Resolution {
-    vec: Vec2,
-    scale: ScaleFactor,
+    pub vec: Vec2,
+    pub scale: ScaleFactor,
 }
 
+#[derive(Clone, Default, Serialize, Deserialize)]
 pub enum ScaleFactor {
     Large,
+    #[default]
     Small,
 }
 impl ScaleFactor {
@@ -35,4 +43,18 @@ impl ScaleFactor {
     }
 }
 
-fn startup() {}
+fn startup(settings: Res<Settings>, mut query_window: Query<&mut Window>) {
+    if let Ok(mut window) = query_window.get_single_mut() {
+        window.resolution.set(
+            320. * settings.resolution.scale.scale(),
+            288. * settings.resolution.scale.scale(),
+        );
+        if let Some(u) = settings.monitor {
+            window.position.center(MonitorSelection::Index(u));
+        } else {
+            window.position.center(MonitorSelection::Primary);
+        }
+    }
+}
+
+fn on_enter() {}
