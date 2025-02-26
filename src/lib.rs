@@ -27,7 +27,7 @@ use bevy::winit::WinitWindows;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_kira_audio::AudioPlugin;
 use combat::CombatPlugin;
-use settings::{Settings, SettingsPlugin};
+use settings::SettingsPlugin;
 use ui::{Palette, UiPlugin};
 use winit::window::Icon;
 
