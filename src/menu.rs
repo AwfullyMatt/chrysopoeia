@@ -40,7 +40,7 @@ fn startup(mut commands: Commands, textures: Res<TextureAssets>) {
     commands
         .spawn((
             Name::new("Main Menu Parent Node"),
-            UiParentNode::normal(),
+            UiParentNode::full(),
             MainMenu,
             CleanupMainMenu,
         ))

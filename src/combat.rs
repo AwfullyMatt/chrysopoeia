@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use leafwing_input_manager::prelude::ActionState;
 
 use crate::{
-    actions::CombatButtonAction, loading::TextureAssets, settings::Settings, CombatState, GameState,
+    actions::CombatButtonAction, loading::TextureAssets, settings::Settings, ui::UiParentNode,
+    CombatState, GameState,
 };
 
 pub struct CombatPlugin;
@@ -33,8 +34,9 @@ struct ButtonRow(usize);
 fn startup(mut commands: Commands, texture_assets: Res<TextureAssets>, settings: Res<Settings>) {
     let entity = commands
         .spawn((
-            Name::new("Combat Button Node"),
-            Node {
+            Name::new("Combat Button Parent Node"),
+            UiParentNode::buttons(),
+            /* Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(20.0),
                 top: Val::Percent(80.0),
@@ -43,7 +45,7 @@ fn startup(mut commands: Commands, texture_assets: Res<TextureAssets>, settings:
                 align_items: AlignItems::Center,
 
                 ..default()
-            },
+            }, */
             CleanupCombat,
         ))
         .id();

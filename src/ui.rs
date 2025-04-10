@@ -14,16 +14,61 @@ impl Plugin for UiPlugin {
 
 fn startup() {}
 
-pub struct UiParentNode;
+#[derive(Component, Default)]
+pub enum UiParentNodePosition {
+    Left,
+    #[default]
+    Center,
+    Right,
+}
+
+#[derive(Bundle)]
+pub struct UiParentNode {
+    pub node: Node,
+    pub position: UiParentNodePosition,
+}
+// TODO: Clean up these associated functions
 impl UiParentNode {
-    pub fn normal() -> Node {
-        Node {
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
-            flex_direction: FlexDirection::Column,
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            ..default()
+    pub fn center() -> UiParentNode {
+        UiParentNode {
+            node: Node {
+                width: Val::Percent(33.3),
+                height: Val::Percent(100.0),
+                flex_direction: FlexDirection::Row,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                justify_self: JustifySelf::Center,
+                ..default()
+            },
+            position: UiParentNodePosition::Center,
+        }
+    }
+    pub fn buttons() -> UiParentNode {
+        UiParentNode {
+            node: Node {
+                width: Val::Percent(33.3),
+                height: Val::Percent(100.0),
+                flex_direction: FlexDirection::Row,
+                align_items: AlignItems::End,
+                justify_content: JustifyContent::SpaceEvenly,
+                justify_self: JustifySelf::Center,
+                ..default()
+            },
+            position: UiParentNodePosition::Center,
+        }
+    }
+    pub fn full() -> UiParentNode {
+        UiParentNode {
+            node: Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                justify_self: JustifySelf::Center,
+                ..default()
+            },
+            position: UiParentNodePosition::Center,
         }
     }
 }
@@ -33,7 +78,7 @@ impl UiButtonNode {
     pub fn normal() -> Node {
         Node {
             width: Val::Percent(10.0),
-            height: Val::Percent(10.0),
+            height: Val::Percent(5.0),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             ..Default::default()

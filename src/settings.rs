@@ -46,8 +46,8 @@ impl ScaleFactor {
 fn startup(settings: Res<Settings>, mut query_window: Query<&mut Window>) {
     if let Ok(mut window) = query_window.get_single_mut() {
         window.resolution.set(
-            320. * settings.resolution.scale.scale(),
-            288. * settings.resolution.scale.scale(),
+            640. * settings.resolution.scale.scale(),
+            360. * settings.resolution.scale.scale(),
         );
         if let Some(u) = settings.monitor {
             window.position.center(MonitorSelection::Index(u));
