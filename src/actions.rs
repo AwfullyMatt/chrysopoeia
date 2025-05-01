@@ -9,33 +9,33 @@ impl Plugin for ActionsPlugin {
 
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, startup)
-            .add_plugins(InputManagerPlugin::<CombatButtonAction>::default());
+            .add_plugins(InputManagerPlugin::<UiButtonAction>::default());
     }
 }
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-pub enum CombatButtonAction {
+pub enum UiButtonAction {
     One,
     Two,
     Three,
     Four,
 }
-impl CombatButtonAction {
-    fn init() -> InputMap<CombatButtonAction> {
+impl UiButtonAction {
+    fn init() -> InputMap<UiButtonAction> {
         InputMap::new([
-            (CombatButtonAction::One, KeyCode::KeyJ),
-            (CombatButtonAction::Two, KeyCode::KeyK),
-            (CombatButtonAction::Three, KeyCode::KeyL),
-            (CombatButtonAction::Four, KeyCode::Semicolon),
+            (UiButtonAction::One, KeyCode::KeyJ),
+            (UiButtonAction::Two, KeyCode::KeyK),
+            (UiButtonAction::Three, KeyCode::KeyL),
+            (UiButtonAction::Four, KeyCode::Semicolon),
         ])
     }
 
-    pub fn array() -> [CombatButtonAction; 4] {
+    pub fn array() -> [UiButtonAction; 4] {
         [
-            CombatButtonAction::One,
-            CombatButtonAction::Two,
-            CombatButtonAction::Three,
-            CombatButtonAction::Four,
+            UiButtonAction::One,
+            UiButtonAction::Two,
+            UiButtonAction::Three,
+            UiButtonAction::Four,
         ]
     }
 
@@ -52,6 +52,6 @@ impl CombatButtonAction {
 fn startup(mut commands: Commands) {
     commands.spawn((
         Name::new("Input Manager: Combat Buttons"),
-        InputManagerBundle::with_map(CombatButtonAction::init()),
+        InputManagerBundle::with_map(UiButtonAction::init()),
     ));
 }

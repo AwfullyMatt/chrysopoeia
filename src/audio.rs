@@ -40,6 +40,7 @@ fn startup(mut commands: Commands, current_song: Res<CurrentSong>) {
 #[derive(Event, Deref)]
 struct MetronomeEvent(MetronomeCommand);
 
+#[allow(dead_code)] // TODO:
 enum MetronomeCommand {
     Play(Song),
     Pause,

@@ -1,4 +1,7 @@
 use bevy::prelude::*;
+use leafwing_input_manager::prelude::ActionState;
+
+use crate::actions::UiButtonAction;
 
 pub struct UiPlugin;
 impl Plugin for UiPlugin {
@@ -8,7 +11,7 @@ impl Plugin for UiPlugin {
 
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, startup)
-            .add_systems(Update, ui_button_interaction);
+            .add_systems(Update, (ui_button_interaction, menu_button_interaction));
     }
 }
 
@@ -16,10 +19,8 @@ fn startup() {}
 
 #[derive(Component, Default)]
 pub enum UiParentNodePosition {
-    Left,
     #[default]
     Center,
-    Right,
 }
 
 #[derive(Bundle)]
@@ -29,20 +30,6 @@ pub struct UiParentNode {
 }
 // TODO: Clean up these associated functions
 impl UiParentNode {
-    pub fn center() -> UiParentNode {
-        UiParentNode {
-            node: Node {
-                width: Val::Percent(33.3),
-                height: Val::Percent(100.0),
-                flex_direction: FlexDirection::Row,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                justify_self: JustifySelf::Center,
-                ..default()
-            },
-            position: UiParentNodePosition::Center,
-        }
-    }
     pub fn buttons() -> UiParentNode {
         UiParentNode {
             node: Node {
@@ -57,34 +44,10 @@ impl UiParentNode {
             position: UiParentNodePosition::Center,
         }
     }
-    pub fn full() -> UiParentNode {
-        UiParentNode {
-            node: Node {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                justify_self: JustifySelf::Center,
-                ..default()
-            },
-            position: UiParentNodePosition::Center,
-        }
-    }
 }
 
 pub struct UiButtonNode;
 impl UiButtonNode {
-    pub fn normal() -> Node {
-        Node {
-            width: Val::Percent(10.0),
-            height: Val::Percent(5.0),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            ..Default::default()
-        }
-    }
-
     pub fn small() -> Node {
         Node {
             width: Val::Px(170.0),
@@ -97,6 +60,7 @@ impl UiButtonNode {
     }
 }
 
+#[allow(dead_code)] // TODO:
 pub enum Palette {
     Black,
     Darker,
@@ -167,7 +131,13 @@ impl Default for UiTextColor {
     }
 }
 
-fn ui_button_interaction(
+#[derive(Component, Deref, DerefMut)]
+pub struct UiButton(pub ButtonRow);
+
+#[derive(Component, Deref, DerefMut)]
+pub struct ButtonRow(pub usize);
+
+fn menu_button_interaction(
     mut interaction_query: Query<
         (
             &Interaction,
@@ -196,6 +166,36 @@ fn ui_button_interaction(
                 background_color.0 = UiBackgroundColor::default().normal.srgb();
                 border_color.0 = UiBorderColor::default().normal.srgb();
                 text_color.0 = UiTextColor::default().normal.srgb();
+            }
+        }
+    }
+}
+
+fn ui_button_interaction(
+    mut query_button_node: Query<(&mut ImageNode, &UiButton)>,
+    query_button_action: Query<&ActionState<UiButtonAction>>,
+) {
+    if let Ok(action_state) = query_button_action.get_single() {
+        for button in UiButtonAction::array() {
+            if action_state.just_pressed(&button) {
+                info!("[PRESSED] Button: {button:?}");
+                for (mut button_node, combat_button) in &mut query_button_node {
+                    if ***combat_button == button.index() {
+                        if let Some(atlas) = &mut button_node.texture_atlas {
+                            atlas.index = (atlas.index + 2) % 3;
+                        }
+                    }
+                }
+            }
+            if action_state.just_released(&button) {
+                info!("[RELEASED] Button: {button:?}");
+                for (mut button_node, combat_button) in &mut query_button_node {
+                    if ***combat_button == button.index() {
+                        if let Some(atlas) = &mut button_node.texture_atlas {
+                            atlas.index = (atlas.index - 2) % 3;
+                        }
+                    }
+                }
             }
         }
     }

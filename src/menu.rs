@@ -1,5 +1,8 @@
 use crate::loading::TextureAssets;
-use crate::ui::{UiBackgroundColor, UiBorderColor, UiButtonNode, UiParentNode, UiTextColor};
+use crate::settings::Settings;
+use crate::ui::{
+    ButtonRow, UiBackgroundColor, UiBorderColor, UiButton, UiButtonNode, UiParentNode, UiTextColor,
+};
 use crate::{CombatState, GameState};
 use bevy::prelude::*;
 
@@ -29,7 +32,7 @@ enum MainMenuButton {
 #[derive(Component)]
 struct CleanupMainMenu;
 
-fn startup(mut commands: Commands, textures: Res<TextureAssets>) {
+fn startup(mut commands: Commands, textures: Res<TextureAssets>, settings: Res<Settings>) {
     info!("[STARUP] Main Menu");
     commands.spawn((Camera2d, Msaa::Off));
     let style = (
@@ -37,31 +40,31 @@ fn startup(mut commands: Commands, textures: Res<TextureAssets>) {
         BorderColor(UiBorderColor::default().normal.srgb()),
         BorderRadius::ZERO,
     );
-    commands
-        .spawn((
-            Name::new("Main Menu Parent Node"),
-            UiParentNode::full(),
-            MainMenu,
-            CleanupMainMenu,
-        ))
-        .with_children(|children| {
-            children
-                .spawn((
-                    Name::new("Play Button Node"),
-                    Button,
-                    MainMenuButton::Play,
-                    UiButtonNode::normal(),
-                    style.clone(),
-                ))
-                .with_child((
-                    Text::new("Play"),
-                    TextFont {
-                        font_size: 40.0,
-                        ..default()
-                    },
-                    TextColor(UiTextColor::default().normal.srgb()),
-                ));
-        });
+
+    let entity = commands
+        .spawn((Name::new("UI Button Parent Node"), UiParentNode::buttons()))
+        .id();
+
+    for i in 0..4 {
+        let child = commands
+            .spawn((
+                ImageNode::from_atlas_image(
+                    textures.button_atlas.clone(),
+                    TextureAtlas::from(textures.button_layout.clone()),
+                ),
+                Node {
+                    width: Val::Px(40. * settings.resolution.scale.scale()),
+                    height: Val::Px(40. * settings.resolution.scale.scale()),
+                    ..default()
+                },
+                UiButton(ButtonRow(i)),
+            ))
+            .id();
+
+        commands.entity(entity).add_child(child);
+        info!("[SPAWNED] UI Button: {i}");
+    }
+
     commands
         .spawn((
             Name::new("Bottom Parent Node"),
@@ -155,7 +158,7 @@ fn click_play_button(
             Interaction::Pressed => match mmb {
                 MainMenuButton::Play => {
                     game_state.set(GameState::Playing);
-                    //combat_state.set(CombatState::In);
+                    combat_state.set(CombatState::In);
                 }
                 MainMenuButton::Settings => {}
                 MainMenuButton::Exit => {}
