@@ -10,10 +10,18 @@ impl Plugin for UiPlugin {
     }
 
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, startup)
-            .add_systems(Update, (ui_button_interaction, menu_button_interaction));
+        app.add_systems(Startup, startup).add_systems(
+            Update,
+            (
+                ui_button_interaction,
+                menu_button_interaction,
+                update_ui_button_icon,
+            ),
+        );
     }
 }
+
+// DATA
 
 #[derive(Component, Default)]
 pub enum UiParentNodePosition {
@@ -28,7 +36,7 @@ pub struct UiParentNode {
 }
 // TODO: Clean up these associated functions
 impl UiParentNode {
-    pub fn buttons() -> UiParentNode {
+    pub fn center() -> UiParentNode {
         UiParentNode {
             node: Node {
                 width: Val::Percent(33.3),
@@ -135,6 +143,27 @@ pub struct UiButton(pub UiButtonRow);
 #[derive(Component, Deref, DerefMut)]
 pub struct UiButtonRow(pub usize);
 
+#[derive(Component)]
+pub enum UiButtonState {
+    Confirm,
+    Deny,
+    Settings,
+    Misc,
+}
+impl UiButtonState {
+    pub fn index(&self) -> usize {
+        use UiButtonState::*;
+        match self {
+            Confirm => 0,
+            Deny => 2,
+            Settings => 4,
+            Misc => 6,
+        }
+    }
+}
+
+pub const UI_BUTTON_LENGTH: usize = 8;
+
 // SYSTEMS
 
 fn startup() {}
@@ -184,7 +213,7 @@ fn ui_button_interaction(
                 for (mut button_node, ui_button) in &mut query_button_node {
                     if ***ui_button == button.index() {
                         if let Some(atlas) = &mut button_node.texture_atlas {
-                            atlas.index = (atlas.index + 1) % 2;
+                            atlas.index = (atlas.index + 1) % UI_BUTTON_LENGTH;
                         }
                     }
                 }
@@ -194,11 +223,21 @@ fn ui_button_interaction(
                 for (mut button_node, ui_button) in &mut query_button_node {
                     if ***ui_button == button.index() {
                         if let Some(atlas) = &mut button_node.texture_atlas {
-                            atlas.index = (atlas.index - 1) % 2;
+                            atlas.index = (atlas.index - 1) % UI_BUTTON_LENGTH;
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+fn update_ui_button_icon(
+    mut query_button_node: Query<(&mut ImageNode, &UiButtonState), Changed<UiButtonState>>,
+) {
+    for (mut button_node, state) in &mut query_button_node {
+        if let Some(atlas) = &mut button_node.texture_atlas {
+            atlas.index = state.index();
         }
     }
 }

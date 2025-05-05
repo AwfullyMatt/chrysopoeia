@@ -1,8 +1,8 @@
 use crate::loading::UiAssets;
 use crate::settings::Settings;
 use crate::ui::{
-    UiBackgroundColor, UiBorderColor, UiButton, UiButtonNode, UiButtonRow, UiParentNode,
-    UiTextColor,
+    UiBackgroundColor, UiBorderColor, UiButton, UiButtonNode, UiButtonRow, UiButtonState,
+    UiParentNode, UiTextColor,
 };
 use crate::{CombatState, GameState};
 use bevy::prelude::*;
@@ -43,15 +43,26 @@ fn startup(mut commands: Commands, ui: Res<UiAssets>, settings: Res<Settings>) {
     );
 
     let entity = commands
-        .spawn((Name::new("UI Button Parent Node"), UiParentNode::buttons()))
+        .spawn((Name::new("UI Button Parent Node"), UiParentNode::center()))
         .id();
 
     for i in 0..4 {
+        let state = match i {
+            0 => UiButtonState::Confirm,
+            1 => UiButtonState::Deny,
+            2 => UiButtonState::Settings,
+            3 => UiButtonState::Misc,
+            _ => unreachable!("[ERROR] UI Button Index Outside of Range."),
+        };
         let child = commands
             .spawn((
                 ImageNode::from_atlas_image(
-                    ui.button_atlas.clone(),
-                    TextureAtlas::from(ui.button_layout.clone()),
+                    ui.button_icon_atlas.clone(),
+                    TextureAtlas {
+                        layout: ui.button_icon_layout.clone(),
+                        index: state.index(),
+                    },
+                    //TextureAtlas::from(ui.button_icon_layout.clone()),
                 ),
                 Node {
                     width: Val::Px(40. * settings.resolution.scale.scale()),
@@ -59,24 +70,10 @@ fn startup(mut commands: Commands, ui: Res<UiAssets>, settings: Res<Settings>) {
                     ..default()
                 },
                 UiButton(UiButtonRow(i)),
-            ))
-            .id();
-        let grandchild = commands
-            .spawn((
-                ImageNode::from_atlas_image(
-                    ui.button_icon_atlas.clone(), // TODO: Programmatically select atlas
-                    TextureAtlas::from(ui.button_icon_layout.clone()),
-                ),
-                Node {
-                    width: Val::Px(40. * settings.resolution.scale.scale()),
-                    height: Val::Px(40. * settings.resolution.scale.scale()),
-                    ..default()
-                },
-                UiButton(UiButtonRow(i)),
+                state,
             ))
             .id();
 
-        commands.entity(child).add_child(grandchild);
         commands.entity(entity).add_child(child);
         info!("[SPAWNED] UI Button: {i}");
     }
