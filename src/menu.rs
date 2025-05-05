@@ -1,7 +1,8 @@
-use crate::loading::TextureAssets;
+use crate::loading::UiAssets;
 use crate::settings::Settings;
 use crate::ui::{
-    ButtonRow, UiBackgroundColor, UiBorderColor, UiButton, UiButtonNode, UiParentNode, UiTextColor,
+    UiBackgroundColor, UiBorderColor, UiButton, UiButtonNode, UiButtonRow, UiParentNode,
+    UiTextColor,
 };
 use crate::{CombatState, GameState};
 use bevy::prelude::*;
@@ -11,7 +12,7 @@ pub struct MenuPlugin;
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::Menu), startup)
-            .add_systems(Update, click_play_button.run_if(in_state(GameState::Menu)))
+            .add_systems(Update, click_ui_buttons.run_if(in_state(GameState::Menu)))
             .add_systems(OnExit(GameState::Menu), cleanup);
     }
 }
@@ -32,7 +33,7 @@ enum MainMenuButton {
 #[derive(Component)]
 struct CleanupMainMenu;
 
-fn startup(mut commands: Commands, textures: Res<TextureAssets>, settings: Res<Settings>) {
+fn startup(mut commands: Commands, ui: Res<UiAssets>, settings: Res<Settings>) {
     info!("[STARUP] Main Menu");
     commands.spawn((Camera2d, Msaa::Off));
     let style = (
@@ -49,18 +50,32 @@ fn startup(mut commands: Commands, textures: Res<TextureAssets>, settings: Res<S
         let child = commands
             .spawn((
                 ImageNode::from_atlas_image(
-                    textures.button_atlas.clone(),
-                    TextureAtlas::from(textures.button_layout.clone()),
+                    ui.button_atlas.clone(),
+                    TextureAtlas::from(ui.button_layout.clone()),
                 ),
                 Node {
                     width: Val::Px(40. * settings.resolution.scale.scale()),
                     height: Val::Px(40. * settings.resolution.scale.scale()),
                     ..default()
                 },
-                UiButton(ButtonRow(i)),
+                UiButton(UiButtonRow(i)),
+            ))
+            .id();
+        let grandchild = commands
+            .spawn((
+                ImageNode::from_atlas_image(
+                    ui.confirm_atlas.clone(), // TODO: Programmatically select atlas
+                    TextureAtlas::from(ui.confirm_layout.clone()),
+                ),
+                Node {
+                    width: Val::Px(40. * settings.resolution.scale.scale()),
+                    height: Val::Px(40. * settings.resolution.scale.scale()),
+                    ..default()
+                },
             ))
             .id();
 
+        commands.entity(child).add_child(grandchild);
         commands.entity(entity).add_child(child);
         info!("[SPAWNED] UI Button: {i}");
     }
@@ -102,7 +117,7 @@ fn startup(mut commands: Commands, textures: Res<TextureAssets>, settings: Res<S
                     ));
                     parent.spawn((
                         ImageNode {
-                            image: textures.bevy.clone(),
+                            image: ui.bevy.clone(),
                             ..default()
                         },
                         Node {
@@ -132,7 +147,7 @@ fn startup(mut commands: Commands, textures: Res<TextureAssets>, settings: Res<S
                     ));
                     parent.spawn((
                         Name::new("Github Image Node"),
-                        ImageNode::new(textures.github.clone()),
+                        ImageNode::new(ui.github.clone()),
                         Node {
                             width: Val::Px(32.),
                             ..default()
@@ -145,7 +160,7 @@ fn startup(mut commands: Commands, textures: Res<TextureAssets>, settings: Res<S
 #[derive(Component)]
 struct OpenLink(&'static str);
 
-fn click_play_button(
+fn click_ui_buttons(
     mut game_state: ResMut<NextState<GameState>>,
     mut combat_state: ResMut<NextState<CombatState>>,
     mut interaction_query: Query<

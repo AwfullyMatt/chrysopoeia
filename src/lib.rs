@@ -39,47 +39,46 @@ impl Plugin for GamePlugin {
     }
 
     fn build(&self, app: &mut App) {
-        app.insert_resource(ClearColor(Color::linear_rgb(0.4, 0.4, 0.4)))
-            .add_plugins(
-                DefaultPlugins
-                    .set(WindowPlugin {
-                        primary_window: Some(Window {
-                            title: "Chrysopoeia".to_string(),
-                            // Bind to canvas included in `index.html`
-                            canvas: Some("#chrysopoeia".to_owned()),
-                            fit_canvas_to_parent: true,
-                            // Tells wasm not to override default event handling, like F5 and Ctrl+R
-                            prevent_default_event_handling: false,
-                            window_theme: Some(bevy::window::WindowTheme::Dark),
-                            resizable: false,
-                            resolution: WindowResolution::new(320., 288.),
-                            ..default()
-                        }),
+        app.add_plugins(
+            DefaultPlugins
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        title: "Chrysopoeia".to_string(),
+                        // Bind to canvas included in `index.html`
+                        canvas: Some("#chrysopoeia".to_owned()),
+                        fit_canvas_to_parent: true,
+                        // Tells wasm not to override default event handling, like F5 and Ctrl+R
+                        prevent_default_event_handling: false,
+                        window_theme: Some(bevy::window::WindowTheme::Dark),
+                        resizable: false,
+                        resolution: WindowResolution::new(320., 288.),
                         ..default()
-                    })
-                    .set(AssetPlugin {
-                        meta_check: AssetMetaCheck::Never,
-                        ..default()
-                    })
-                    .set(ImagePlugin::default_nearest()),
-            )
-            .add_plugins(AudioPlugin)
-            .add_plugins(WorldInspectorPlugin::new())
-            .add_plugins((
-                LoadingPlugin,
-                MenuPlugin,
-                ActionsPlugin,
-                InternalAudioPlugin,
-                PlayerPlugin,
-                UiPlugin,
-                CombatPlugin,
-                SettingsPlugin,
-            ))
-            .add_systems(Startup, startup)
-            .init_state::<GameState>()
-            .insert_resource(ClearColor(Palette::Dark.srgb()))
-            .add_sub_state::<PauseState>()
-            .add_sub_state::<CombatState>();
+                    }),
+                    ..default()
+                })
+                .set(AssetPlugin {
+                    meta_check: AssetMetaCheck::Never,
+                    ..default()
+                })
+                .set(ImagePlugin::default_nearest()),
+        )
+        .add_plugins(AudioPlugin)
+        .add_plugins(WorldInspectorPlugin::new())
+        .add_plugins((
+            LoadingPlugin,
+            MenuPlugin,
+            ActionsPlugin,
+            InternalAudioPlugin,
+            PlayerPlugin,
+            UiPlugin,
+            CombatPlugin,
+            SettingsPlugin,
+        ))
+        .add_systems(Startup, startup)
+        .init_state::<GameState>()
+        .insert_resource(ClearColor(Palette::Darker.srgb()))
+        .add_sub_state::<PauseState>()
+        .add_sub_state::<CombatState>();
 
         /* #[cfg(debug_assertions)]
         {

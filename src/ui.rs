@@ -15,8 +15,6 @@ impl Plugin for UiPlugin {
     }
 }
 
-fn startup() {}
-
 #[derive(Component, Default)]
 pub enum UiParentNodePosition {
     #[default]
@@ -132,10 +130,14 @@ impl Default for UiTextColor {
 }
 
 #[derive(Component, Deref, DerefMut)]
-pub struct UiButton(pub ButtonRow);
+pub struct UiButton(pub UiButtonRow);
 
 #[derive(Component, Deref, DerefMut)]
-pub struct ButtonRow(pub usize);
+pub struct UiButtonRow(pub usize);
+
+// SYSTEMS
+
+fn startup() {}
 
 fn menu_button_interaction(
     mut interaction_query: Query<

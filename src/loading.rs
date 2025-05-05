@@ -12,19 +12,39 @@ impl Plugin for LoadingPlugin {
         app.add_loading_state(
             LoadingState::new(GameState::Loading)
                 .continue_to_state(GameState::Menu)
-                .load_collection::<TextureAssets>(),
+                .load_collection::<UiAssets>(),
         );
     }
 }
 
 #[derive(AssetCollection, Resource)]
-pub struct TextureAssets {
-    #[asset(path = "textures/bevy.png")]
+pub struct UiAssets {
+    #[asset(path = "textures/ui/bevy.png")]
     pub bevy: Handle<Image>,
-    #[asset(path = "textures/github.png")]
+    #[asset(path = "textures/ui/github.png")]
     pub github: Handle<Image>,
     #[asset(texture_atlas_layout(tile_size_x = 40, tile_size_y = 40, columns = 3, rows = 1,))]
     pub button_layout: Handle<TextureAtlasLayout>,
-    #[asset(path = "textures/button_atlas.png")]
+    #[asset(path = "textures/ui/ui_button_atlas.png")]
     pub button_atlas: Handle<Image>,
+    #[asset(texture_atlas_layout(tile_size_x = 40, tile_size_y = 40, columns = 8, rows = 1,))]
+    pub button_icon_layout: Handle<TextureAtlasLayout>,
+    #[asset(path = "textures/ui/button_icon_atlas.png")]
+    pub button_icon_atlas: Handle<Image>,
+    #[asset(texture_atlas_layout(tile_size_x = 40, tile_size_y = 40, columns = 2, rows = 1,))]
+    pub confirm_layout: Handle<TextureAtlasLayout>,
+    #[asset(path = "textures/ui/confirm_atlas.png")]
+    pub confirm_atlas: Handle<Image>,
+    #[asset(texture_atlas_layout(tile_size_x = 40, tile_size_y = 40, columns = 2, rows = 1,))]
+    pub deny_layout: Handle<TextureAtlasLayout>,
+    #[asset(path = "textures/ui/deny_atlas.png")]
+    pub deny_atlas: Handle<Image>,
+    #[asset(texture_atlas_layout(tile_size_x = 40, tile_size_y = 40, columns = 2, rows = 1,))]
+    pub settings_layout: Handle<TextureAtlasLayout>,
+    #[asset(path = "textures/ui/settings_atlas.png")]
+    pub settings_atlas: Handle<Image>,
+    #[asset(texture_atlas_layout(tile_size_x = 40, tile_size_y = 40, columns = 2, rows = 1,))]
+    pub misc_layout: Handle<TextureAtlasLayout>,
+    #[asset(path = "textures/ui/misc_atlas.png")]
+    pub misc_atlas: Handle<Image>,
 }
