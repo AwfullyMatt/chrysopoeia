@@ -23,7 +23,7 @@ pub struct UiAssets {
     pub bevy: Handle<Image>,
     #[asset(path = "textures/ui/github.png")]
     pub github: Handle<Image>,
-    #[asset(texture_atlas_layout(tile_size_x = 40, tile_size_y = 40, columns = 3, rows = 1,))]
+    #[asset(texture_atlas_layout(tile_size_x = 40, tile_size_y = 40, columns = 2, rows = 1,))]
     pub button_layout: Handle<TextureAtlasLayout>,
     #[asset(path = "textures/ui/ui_button_atlas.png")]
     pub button_atlas: Handle<Image>,
@@ -31,20 +31,4 @@ pub struct UiAssets {
     pub button_icon_layout: Handle<TextureAtlasLayout>,
     #[asset(path = "textures/ui/button_icon_atlas.png")]
     pub button_icon_atlas: Handle<Image>,
-    #[asset(texture_atlas_layout(tile_size_x = 40, tile_size_y = 40, columns = 2, rows = 1,))]
-    pub confirm_layout: Handle<TextureAtlasLayout>,
-    #[asset(path = "textures/ui/confirm_atlas.png")]
-    pub confirm_atlas: Handle<Image>,
-    #[asset(texture_atlas_layout(tile_size_x = 40, tile_size_y = 40, columns = 2, rows = 1,))]
-    pub deny_layout: Handle<TextureAtlasLayout>,
-    #[asset(path = "textures/ui/deny_atlas.png")]
-    pub deny_atlas: Handle<Image>,
-    #[asset(texture_atlas_layout(tile_size_x = 40, tile_size_y = 40, columns = 2, rows = 1,))]
-    pub settings_layout: Handle<TextureAtlasLayout>,
-    #[asset(path = "textures/ui/settings_atlas.png")]
-    pub settings_atlas: Handle<Image>,
-    #[asset(texture_atlas_layout(tile_size_x = 40, tile_size_y = 40, columns = 2, rows = 1,))]
-    pub misc_layout: Handle<TextureAtlasLayout>,
-    #[asset(path = "textures/ui/misc_atlas.png")]
-    pub misc_atlas: Handle<Image>,
 }

@@ -64,8 +64,8 @@ fn startup(mut commands: Commands, ui: Res<UiAssets>, settings: Res<Settings>) {
         let grandchild = commands
             .spawn((
                 ImageNode::from_atlas_image(
-                    ui.confirm_atlas.clone(), // TODO: Programmatically select atlas
-                    TextureAtlas::from(ui.confirm_layout.clone()),
+                    ui.button_icon_atlas.clone(), // TODO: Programmatically select atlas
+                    TextureAtlas::from(ui.button_icon_layout.clone()),
                 ),
                 Node {
                     width: Val::Px(40. * settings.resolution.scale.scale()),

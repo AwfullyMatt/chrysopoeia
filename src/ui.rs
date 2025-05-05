@@ -184,7 +184,7 @@ fn ui_button_interaction(
                 for (mut button_node, combat_button) in &mut query_button_node {
                     if ***combat_button == button.index() {
                         if let Some(atlas) = &mut button_node.texture_atlas {
-                            atlas.index = (atlas.index + 2) % 3;
+                            atlas.index = (atlas.index + 1) % 2;
                         }
                     }
                 }
@@ -194,7 +194,7 @@ fn ui_button_interaction(
                 for (mut button_node, combat_button) in &mut query_button_node {
                     if ***combat_button == button.index() {
                         if let Some(atlas) = &mut button_node.texture_atlas {
-                            atlas.index = (atlas.index - 2) % 3;
+                            atlas.index = (atlas.index - 1) % 2;
                         }
                     }
                 }
