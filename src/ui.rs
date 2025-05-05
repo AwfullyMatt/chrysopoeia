@@ -181,8 +181,8 @@ fn ui_button_interaction(
         for button in UiButtonAction::array() {
             if action_state.just_pressed(&button) {
                 info!("[PRESSED] Button: {button:?}");
-                for (mut button_node, combat_button) in &mut query_button_node {
-                    if ***combat_button == button.index() {
+                for (mut button_node, ui_button) in &mut query_button_node {
+                    if ***ui_button == button.index() {
                         if let Some(atlas) = &mut button_node.texture_atlas {
                             atlas.index = (atlas.index + 1) % 2;
                         }
@@ -191,8 +191,8 @@ fn ui_button_interaction(
             }
             if action_state.just_released(&button) {
                 info!("[RELEASED] Button: {button:?}");
-                for (mut button_node, combat_button) in &mut query_button_node {
-                    if ***combat_button == button.index() {
+                for (mut button_node, ui_button) in &mut query_button_node {
+                    if ***ui_button == button.index() {
                         if let Some(atlas) = &mut button_node.texture_atlas {
                             atlas.index = (atlas.index - 1) % 2;
                         }

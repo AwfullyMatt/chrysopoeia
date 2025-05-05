@@ -72,6 +72,7 @@ fn startup(mut commands: Commands, ui: Res<UiAssets>, settings: Res<Settings>) {
                     height: Val::Px(40. * settings.resolution.scale.scale()),
                     ..default()
                 },
+                UiButton(UiButtonRow(i)),
             ))
             .id();
 
