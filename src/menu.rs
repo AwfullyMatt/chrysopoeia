@@ -42,26 +42,42 @@ fn startup(mut commands: Commands, ui: Res<UiAssets>, settings: Res<Settings>) {
         BorderRadius::ZERO,
     );
 
-    // Spawn Center/Left/Right Nodes
-    commands.spawn((
-        Name::new("UI Parent Node: Right"),
-        UiParentNode::new(UiParentNodePosition::Right),
-    ));
-    // .with_child(ImageNode::from_atlas_image(
-    //     ui.pendulum_atlas.clone(),
-    //     TextureAtlas {
-    //         layout: ui.pendulum_layout.clone(),
-    //         index: 0,
-    //     },
-    // ));
+    // Set Up Right UI Node
+    let right_entity = commands
+        .spawn((
+            Name::new("UI Parent Node: Right"),
+            UiParentNode::new(UiParentNodePosition::Right, AlignItems::Start),
+        ))
+        .id();
+    let right_child = commands
+        .spawn((
+            ImageNode::from_atlas_image(
+                ui.pendulum_atlas.clone(),
+                TextureAtlas {
+                    layout: ui.pendulum_layout.clone(),
+                    index: 0,
+                },
+            ),
+            Node {
+                width: Val::Px(40. * settings.resolution.scale.scale()),
+                height: Val::Px(40. * settings.resolution.scale.scale()),
+                ..default()
+            },
+        ))
+        .id();
+    commands.entity(right_entity).add_child(right_child);
+
+    // Set Up Left UI Node
     commands.spawn((
         Name::new("UI Parent Node: Left"),
-        UiParentNode::new(UiParentNodePosition::Left),
+        UiParentNode::new(UiParentNodePosition::Left, AlignItems::Start),
     ));
+
+    // Set up Center UI Node
     let center_entity = commands
         .spawn((
             Name::new("UI Parent Node: Center"),
-            UiParentNode::new(UiParentNodePosition::Center),
+            UiParentNode::new(UiParentNodePosition::Center, AlignItems::End),
         ))
         .id();
 
