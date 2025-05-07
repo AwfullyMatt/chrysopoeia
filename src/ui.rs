@@ -36,33 +36,24 @@ pub struct UiParentNode {
     pub node: Node,
     pub position: UiParentNodePosition,
 }
-impl Default for UiParentNode {
-    fn default() -> Self {
-        Self {
+// TODO: Clean up these associated functions
+impl UiParentNode {
+    pub fn new(position: UiParentNodePosition) -> Self {
+        let justify_self = match position {
+            UiParentNodePosition::Center => JustifySelf::Center,
+            UiParentNodePosition::Left => JustifySelf::Start,
+            UiParentNodePosition::Right => JustifySelf::End,
+        };
+
+        UiParentNode {
             node: Node {
                 width: Val::Percent(33.3),
                 height: Val::Percent(100.0),
                 flex_direction: FlexDirection::Row,
                 align_items: AlignItems::End,
+                align_self: AlignSelf::End,
                 justify_content: JustifyContent::SpaceEvenly,
-                justify_self: JustifySelf::Center,
-                ..default()
-            },
-            ..default()
-        }
-    }
-}
-// TODO: Clean up these associated functions
-impl UiParentNode {
-    pub fn new(position: UiParentNodePosition) -> Self {
-        let justify = match position {
-            UiParentNodePosition::Center => JustifySelf::Center,
-            UiParentNodePosition::Left => JustifySelf::Start,
-            UiParentNodePosition::Right => JustifySelf::End,
-        };
-        Self {
-            node: Node {
-                justify_self: justify,
+                justify_self,
                 ..default()
             },
             position,

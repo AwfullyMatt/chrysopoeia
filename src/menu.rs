@@ -47,6 +47,13 @@ fn startup(mut commands: Commands, ui: Res<UiAssets>, settings: Res<Settings>) {
         Name::new("UI Parent Node: Right"),
         UiParentNode::new(UiParentNodePosition::Right),
     ));
+    // .with_child(ImageNode::from_atlas_image(
+    //     ui.pendulum_atlas.clone(),
+    //     TextureAtlas {
+    //         layout: ui.pendulum_layout.clone(),
+    //         index: 0,
+    //     },
+    // ));
     commands.spawn((
         Name::new("UI Parent Node: Left"),
         UiParentNode::new(UiParentNodePosition::Left),

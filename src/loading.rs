@@ -27,4 +27,8 @@ pub struct UiAssets {
     pub button_icon_layout: Handle<TextureAtlasLayout>,
     #[asset(path = "textures/ui/button_icon_atlas.png")]
     pub button_icon_atlas: Handle<Image>,
+    #[asset(texture_atlas_layout(tile_size_x = 40, tile_size_y = 40, columns = 16, rows = 1,))]
+    pub pendulum_layout: Handle<TextureAtlasLayout>,
+    #[asset(path = "textures/ui/pendulum_full_atlas.png")]
+    pub pendulum_atlas: Handle<Image>,
 }
