@@ -2,7 +2,7 @@ use crate::loading::UiAssets;
 use crate::settings::Settings;
 use crate::ui::{
     UiBackgroundColor, UiBorderColor, UiButton, UiButtonNode, UiButtonRow, UiButtonState,
-    UiParentNode, UiTextColor,
+    UiParentNode, UiParentNodePosition, UiTextColor,
 };
 use crate::{CombatState, GameState};
 use bevy::prelude::*;
@@ -42,8 +42,20 @@ fn startup(mut commands: Commands, ui: Res<UiAssets>, settings: Res<Settings>) {
         BorderRadius::ZERO,
     );
 
-    let entity = commands
-        .spawn((Name::new("UI Button Parent Node"), UiParentNode::center()))
+    // Spawn Center/Left/Right Nodes
+    commands.spawn((
+        Name::new("UI Parent Node: Right"),
+        UiParentNode::new(UiParentNodePosition::Right),
+    ));
+    commands.spawn((
+        Name::new("UI Parent Node: Left"),
+        UiParentNode::new(UiParentNodePosition::Left),
+    ));
+    let center_entity = commands
+        .spawn((
+            Name::new("UI Parent Node: Center"),
+            UiParentNode::new(UiParentNodePosition::Center),
+        ))
         .id();
 
     for i in 0..4 {
@@ -62,7 +74,6 @@ fn startup(mut commands: Commands, ui: Res<UiAssets>, settings: Res<Settings>) {
                         layout: ui.button_icon_layout.clone(),
                         index: state.index(),
                     },
-                    //TextureAtlas::from(ui.button_icon_layout.clone()),
                 ),
                 Node {
                     width: Val::Px(40. * settings.resolution.scale.scale()),
@@ -74,7 +85,7 @@ fn startup(mut commands: Commands, ui: Res<UiAssets>, settings: Res<Settings>) {
             ))
             .id();
 
-        commands.entity(entity).add_child(child);
+        commands.entity(center_entity).add_child(child);
         info!("[SPAWNED] UI Button: {i}");
     }
 

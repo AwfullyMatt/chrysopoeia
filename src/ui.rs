@@ -27,6 +27,8 @@ impl Plugin for UiPlugin {
 pub enum UiParentNodePosition {
     #[default]
     Center,
+    Right,
+    Left,
 }
 
 #[derive(Bundle)]
@@ -34,10 +36,9 @@ pub struct UiParentNode {
     pub node: Node,
     pub position: UiParentNodePosition,
 }
-// TODO: Clean up these associated functions
-impl UiParentNode {
-    pub fn center() -> UiParentNode {
-        UiParentNode {
+impl Default for UiParentNode {
+    fn default() -> Self {
+        Self {
             node: Node {
                 width: Val::Percent(33.3),
                 height: Val::Percent(100.0),
@@ -47,7 +48,24 @@ impl UiParentNode {
                 justify_self: JustifySelf::Center,
                 ..default()
             },
-            position: UiParentNodePosition::Center,
+            ..default()
+        }
+    }
+}
+// TODO: Clean up these associated functions
+impl UiParentNode {
+    pub fn new(position: UiParentNodePosition) -> Self {
+        let justify = match position {
+            UiParentNodePosition::Center => JustifySelf::Center,
+            UiParentNodePosition::Left => JustifySelf::Start,
+            UiParentNodePosition::Right => JustifySelf::End,
+        };
+        Self {
+            node: Node {
+                justify_self: justify,
+                ..default()
+            },
+            position,
         }
     }
 }
