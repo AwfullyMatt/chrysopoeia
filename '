@@ -47,7 +47,7 @@ fn startup(mut commands: Commands, ui: Res<UiAssets>, settings: Res<Settings>) {
     let scale = settings.resolution.scale.scale();
     let text_font = TextFont {
         font: ui.pixelify.clone(),
-        font_size: 20.0, // TODO: Programatically size
+        font_size: 24.0, // TODO: Programatically size
         ..default()
     };
     let text_color = TextColor(Palette::White.srgb());
@@ -59,9 +59,8 @@ fn startup(mut commands: Commands, ui: Res<UiAssets>, settings: Res<Settings>) {
             UiParentNode::new(UiParentNodePosition::Right, AlignItems::Start),
         ))
         .id();
-    let pendulum_atlas_node = commands
+    let pendulum_atlas = commands
         .spawn((
-            Name::new("Pendulum Atlas Node"),
             ImageNode::from_atlas_image(
                 ui.pendulum_atlas.clone(),
                 TextureAtlas {
@@ -70,64 +69,41 @@ fn startup(mut commands: Commands, ui: Res<UiAssets>, settings: Res<Settings>) {
                 },
             ),
             Node {
+                width: Val::Percent(33.3),
+                height: Val::Percent(33.3),
+                ..default()
+            },
+        ))
+        .id();
+    let pendulum_text = commands
+        .spawn((
+            Text::new(
+                "
+                bpm:\n
+                dur:\n
+                ",
+            ),
+            text_font.clone(),
+            text_color.clone(),
+            Node {
+                width: Val::Px(40. * scale),
+                height: Val::Px(40. * scale),
+                ..default()
+            },
+        ))
+        .with_child((
+            TextSpan::new("NaN\nNaN"),
+            (text_font, text_color),
+            Node {
                 width: Val::Px(40. * scale),
                 height: Val::Px(40. * scale),
                 ..default()
             },
         ))
         .id();
-    let pendulum_text_node = commands
-        .spawn((
-            Name::new("Pendulum Text Node"),
-            Node {
-                width: Val::Px(80. * scale),
-                height: Val::Px(80. * scale),
-                flex_direction: FlexDirection::Column,
-                ..default()
-            },
-        ))
-        .id();
-    let bpm_text = commands
-        .spawn((
-            Name::new("BPM Text Node"),
-            Text::new("bpm: "),
-            text_font.clone(),
-            text_color.clone(),
-            Node {
-                width: Val::Px(40. * scale),
-                height: Val::Px(20. * scale),
-                ..default()
-            },
-        ))
-        .with_child((
-            TextSpan::new("NaN"),
-            (text_font.clone(), text_color.clone()),
-        ))
-        .id();
-    let dur_text = commands
-        .spawn((
-            Name::new("Duration Text Node"),
-            Text::new("dur: "),
-            text_font.clone(),
-            text_color.clone(),
-            Node {
-                width: Val::Px(40. * scale),
-                height: Val::Px(20. * scale),
-                ..default()
-            },
-        ))
-        .with_child((
-            TextSpan::new("NaN"),
-            (text_font.clone(), text_color.clone()),
-        ))
-        .id();
-
-    commands
-        .entity(pendulum_text_node)
-        .add_children(&[bpm_text, dur_text]);
     commands
         .entity(right_entity)
-        .add_children(&[pendulum_atlas_node, pendulum_text_node]);
+        .add_children(&[pendulum_atlas, pendulum_text]);
 
     // Set Up Left UI Node
     commands.spawn((

@@ -31,4 +31,6 @@ pub struct UiAssets {
     pub pendulum_layout: Handle<TextureAtlasLayout>,
     #[asset(path = "textures/ui/pendulum_full_atlas.png")]
     pub pendulum_atlas: Handle<Image>,
+    #[asset(path = "fonts/PixelifySans-Regular.ttf")]
+    pub pixelify: Handle<Font>,
 }

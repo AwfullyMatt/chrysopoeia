@@ -39,15 +39,15 @@ pub struct UiParentNode {
 // TODO: Clean up these associated functions
 impl UiParentNode {
     pub fn new(position: UiParentNodePosition, align_items: AlignItems) -> Self {
-        let justify_self = match position {
-            UiParentNodePosition::Center => JustifySelf::Center,
-            UiParentNodePosition::Left => JustifySelf::Start,
-            UiParentNodePosition::Right => JustifySelf::End,
+        let (justify_self, width) = match position {
+            UiParentNodePosition::Center => (JustifySelf::Center, 50.0),
+            UiParentNodePosition::Left => (JustifySelf::Start, 25.0),
+            UiParentNodePosition::Right => (JustifySelf::End, 25.0),
         };
 
         UiParentNode {
             node: Node {
-                width: Val::Percent(33.3),
+                width: Val::Percent(width),
                 height: Val::Percent(100.0),
                 flex_direction: FlexDirection::Row,
                 align_items,

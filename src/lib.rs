@@ -2,6 +2,7 @@
 
 mod actions;
 mod audio;
+mod character;
 mod combat;
 mod loading;
 mod menu;
